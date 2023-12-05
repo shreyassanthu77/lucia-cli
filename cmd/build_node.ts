@@ -1,29 +1,28 @@
-// ex. scripts/build_npm.ts
 import { build, emptyDir } from "https://deno.land/x/dnt@0.39.0/mod.ts";
+import { version } from "./version.ts";
 
 await emptyDir("./npm");
 
 await build({
   entryPoints: [
-    {
-      kind: "bin",
-      name: "lucia",
-      path: "./cmd/main.ts",
-    },
+    "./cmd/main.ts",
   ],
   outDir: "./npm",
   shims: {
     deno: true,
   },
-  skipSourceOutput: true,
-  esModule: false,
   typeCheck: false,
   declaration: false,
+  esModule: false,
+  test: false,
   package: {
     name: "lucia-cli",
-    version: Deno.args[0],
+    version,
     description: "A CLI for Lucia Auth",
     license: "MIT",
+    bin: {
+      lucia: "./script/main.js",
+    },
     repository: {
       type: "git",
       url: "git+https://github.com/shreyassanthu77/lucia-cli.git",
@@ -33,6 +32,15 @@ await build({
     },
   },
   postBuild() {
+    addShebang("npm/script/main.js");
     Deno.copyFileSync("Readme.md", "npm/README.md");
   },
 });
+
+function addShebang(path: string) {
+  const content = Deno.readTextFileSync(path);
+  Deno.writeTextFileSync(
+    path,
+    `#!/usr/bin/env node\n${content}`,
+  );
+}
