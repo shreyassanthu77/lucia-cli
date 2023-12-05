@@ -16,4 +16,4 @@ const root = new Command()
   })
   .command("init", initCommand);
 
-await root.parse(Deno.args);
+root.parse(Deno.args);
